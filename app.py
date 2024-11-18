@@ -1,4 +1,6 @@
 import os
+import sys
+import gradio as gr
 
 from theflow.settings import settings as flowsettings
 
@@ -12,13 +14,25 @@ if GRADIO_TEMP_DIR is None:
 
 from ktem.main import App  # noqa
 
-app = App()
-demo = app.make()
-demo.queue().launch(
-    favicon_path=app._favicon,
-    inbrowser=True,
-    allowed_paths=[
-        "libs/ktem/ktem/assets",
-        GRADIO_TEMP_DIR,
-    ],
-)
+deploy = App()
+demo = deploy.make()
+# demo.queue().launch(
+#     favicon_path=deploy._favicon,
+#     inbrowser=True,
+#     allowed_paths=[
+#         "libs/ktem/ktem/assets",
+#         GRADIO_TEMP_DIR,
+#     ],
+# )
+
+import uvicorn
+from fastapi import FastAPI
+
+
+app = FastAPI()
+# app.include_router(whoami_router.router)
+
+app = gr.mount_gradio_app(app, demo.queue(), path="/")
+
+if __name__ == "__main__":
+    uvicorn.run(app="app:app", host="127.0.0.1", port=8080)
